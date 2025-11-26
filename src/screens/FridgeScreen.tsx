@@ -292,6 +292,7 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         paddingHorizontal: spacing.md,
+        gap: spacing.sm,
     },
     filterPill: {
         flexDirection: 'row',
@@ -300,9 +301,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
         borderRadius: borderRadius.full,
+        gap: spacing.xs,
         borderWidth: 1,
         borderColor: colors.surfaceElevated,
-        marginRight: spacing.sm,
     },
     filterPillActive: {
         backgroundColor: colors.accent,
@@ -310,7 +311,6 @@ const styles = StyleSheet.create({
     },
     filterEmoji: {
         fontSize: 16,
-        marginRight: spacing.xs,
     },
     filterLabel: {
         ...typography.bodySmall,
@@ -327,7 +327,6 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.full,
         minWidth: 20,
         alignItems: 'center',
-        marginLeft: spacing.xs,
     },
     filterCountActive: {
         backgroundColor: colors.accentDark,

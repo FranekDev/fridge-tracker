@@ -198,7 +198,6 @@ export function ScanScreen({ onProductsScanned }: ScanScreenProps) {
             </Animated.View>
 
             <Pressable style={styles.secondaryButton} onPress={pickImage}>
-                <Text style={styles.secondaryButtonIcon}>🖼️</Text>
                 <Text style={styles.secondaryButtonText}>Choose from Gallery</Text>
             </Pressable>
         </View>
@@ -333,11 +332,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.xl,
         paddingVertical: spacing.md + 4,
         borderRadius: borderRadius.full,
+        gap: spacing.sm,
         ...shadows.md,
     },
     primaryButtonIcon: {
         fontSize: 24,
-        marginRight: spacing.sm,
     },
     primaryButtonText: {
         ...typography.h3,
@@ -351,12 +350,12 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.md,
         borderRadius: borderRadius.full,
         marginTop: spacing.md,
+        gap: spacing.sm,
         borderWidth: 1,
         borderColor: colors.surfaceHighlight,
     },
     secondaryButtonIcon: {
         fontSize: 20,
-        marginRight: spacing.sm,
     },
     secondaryButtonText: {
         ...typography.body,
@@ -410,6 +409,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: spacing.md,
         paddingBottom: spacing.xl,
+        gap: spacing.md,
     },
     retakeButton: {
         flex: 1,
@@ -420,7 +420,6 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.lg,
         borderWidth: 1,
         borderColor: colors.surfaceHighlight,
-        marginRight: spacing.md,
     },
     retakeButtonText: {
         ...typography.body,
@@ -434,11 +433,11 @@ const styles = StyleSheet.create({
         backgroundColor: colors.accent,
         paddingVertical: spacing.md,
         borderRadius: borderRadius.lg,
+        gap: spacing.sm,
         ...shadows.md,
     },
     scanButtonIcon: {
         fontSize: 20,
-        marginRight: spacing.sm,
     },
     scanButtonText: {
         ...typography.body,

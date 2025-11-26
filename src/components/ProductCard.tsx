@@ -187,12 +187,12 @@ const styles = StyleSheet.create({
     metaRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: spacing.sm,
     },
     categoryBadge: {
         paddingHorizontal: spacing.sm,
         paddingVertical: 2,
         borderRadius: borderRadius.sm,
-        marginRight: spacing.sm,
     },
     categoryText: {
         ...typography.caption,
@@ -219,12 +219,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.sm,
         paddingVertical: 4,
         borderRadius: borderRadius.full,
+        gap: 4,
     },
     expiryDot: {
         width: 6,
         height: 6,
         borderRadius: 3,
-        marginRight: 4,
     },
     expiryText: {
         ...typography.caption,

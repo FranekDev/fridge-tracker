@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         ...shadows.lg,
     },
     tabItem: {
-        paddingVertical: spacing.xs,
+        paddingVertical: spacing.sm,
     },
     tabLabel: {
         fontSize: 12,
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surfaceElevated,
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: spacing.sm,
     },
     tabIconFocused: {
         backgroundColor: colors.accent + '25',
