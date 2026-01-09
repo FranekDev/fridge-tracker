@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { Product } from '../types';
-import { processReceipt } from '../api/mockApi';
+import { processReceipt } from '../api/receipts';
 import { ScannedProductsList } from '../components/ScannedProductsList';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { colors, spacing, borderRadius, typography, shadows } from '../theme';

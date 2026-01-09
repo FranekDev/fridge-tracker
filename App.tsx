@@ -1,13 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FridgeScreen } from './src/screens/FridgeScreen';
 import { ScanScreen } from './src/screens/ScanScreen';
+import { AuthScreen } from './src/screens/AuthScreen';
+import { ReceiptsScreen } from './src/screens/ReceiptsScreen';
+import { RecipesScreen } from './src/screens/RecipesScreen';
 import { Product } from './src/types';
 import { colors, borderRadius, spacing, shadows } from './src/theme';
+import { useAuth } from './src/hooks/useAuth';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,6 +40,7 @@ function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
 }
 
 export default function App() {
+    const { user, loading } = useAuth();
     const [newProducts, setNewProducts] = useState<Product[]>([]);
 
     const handleProductsScanned = useCallback((products: Product[]) => {
@@ -46,6 +51,29 @@ export default function App() {
         setNewProducts([]);
     }, []);
 
+    // Loading state podczas sprawdzania sesji
+    if (loading) {
+        return (
+            <SafeAreaProvider>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={colors.accent} />
+                    <Text style={styles.loadingText}>Ładowanie...</Text>
+                </View>
+            </SafeAreaProvider>
+        );
+    }
+
+    // Jeśli nie zalogowany, pokaż ekran logowania
+    if (!user) {
+        return (
+            <SafeAreaProvider>
+                <StatusBar style="light" />
+                <AuthScreen />
+            </SafeAreaProvider>
+        );
+    }
+
+    // Główna aplikacja dla zalogowanych użytkowników
     return (
         <SafeAreaProvider>
             <NavigationContainer theme={AppTheme}>
@@ -70,6 +98,23 @@ export default function App() {
                             <FridgeScreen newProducts={newProducts} onProductsAdded={handleProductsAdded} />
                         )}
                     </Tab.Screen>
+
+                    <Tab.Screen
+                        name="Receipts"
+                        component={ReceiptsScreen}
+                        options={{
+                            tabBarIcon: ({ focused }) => <TabIcon emoji="🧾" focused={focused} />,
+                        }}
+                    />
+
+                    <Tab.Screen
+                        name="Recipes"
+                        component={RecipesScreen}
+                        options={{
+                            tabBarIcon: ({ focused }) => <TabIcon emoji="🍽️" focused={focused} />,
+                        }}
+                    />
+
                     <Tab.Screen
                         name="Scan"
                         options={{
@@ -85,6 +130,17 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+    },
+    loadingText: {
+        marginTop: spacing.md,
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
     tabBar: {
         backgroundColor: colors.surface,
         borderTopWidth: 1,

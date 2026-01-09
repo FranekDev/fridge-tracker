@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Product, ProductCategory } from '../types';
-import { getMyProducts, removeProduct } from '../api/mockApi';
+import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingOverlay } from '../components/LoadingOverlay';
@@ -27,34 +27,21 @@ interface FridgeScreenProps {
 }
 
 export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps) {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+    const {
+        products,
+        loading,
+        error,
+        refetch,
+        addProducts: addProductsToDb,
+        removeProduct: removeProductFromDb,
+    } = useProducts();
+
     const [refreshing, setRefreshing] = useState(false);
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-    const [error, setError] = useState<string | null>(null);
 
     const headerAnim = React.useRef(new Animated.Value(0)).current;
 
-    const fetchProducts = useCallback(async () => {
-        try {
-            const response = await getMyProducts();
-            if (response.success) {
-                setProducts(response.data);
-                setError(null);
-            } else {
-                setError(response.error || 'Failed to fetch products');
-            }
-        } catch (e) {
-            setError('Something went wrong');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    }, []);
-
     useEffect(() => {
-        fetchProducts();
-
         // Animate header on mount
         Animated.spring(headerAnim, {
             toValue: 1,
@@ -66,14 +53,17 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
     // Handle new products from scanning
     useEffect(() => {
         if (newProducts && newProducts.length > 0) {
-            setProducts((prev) => [...newProducts, ...prev]);
-            onProductsAdded?.();
+            // Dodaj produkty do bazy danych
+            addProductsToDb(newProducts).then(() => {
+                onProductsAdded?.();
+            });
         }
     }, [newProducts]);
 
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setRefreshing(true);
-        fetchProducts();
+        await refetch();
+        setRefreshing(false);
     };
 
     const handleDeleteProduct = (product: Product) => {
@@ -83,8 +73,7 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                 text: 'Remove',
                 style: 'destructive',
                 onPress: async () => {
-                    await removeProduct(product.id);
-                    setProducts((prev) => prev.filter((p) => p.id !== product.id));
+                    await removeProductFromDb(product.id);
                 },
             },
         ]);
@@ -190,7 +179,7 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                     title="Oops!"
                     description={error}
                     actionLabel="Try Again"
-                    onAction={fetchProducts}
+                    onAction={refetch}
                 />
             </SafeAreaView>
         );
