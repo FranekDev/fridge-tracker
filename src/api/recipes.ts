@@ -3,6 +3,12 @@ import { GEMINI_CONFIG } from '../config/gemini.config';
 import { Product, ApiResponse, SavedRecipe } from '../types';
 import { supabase } from './supabase';
 
+export interface RecipePreferences {
+  priorityType: 'expiry' | 'none';
+  prepTime: 'short' | 'medium' | 'long' | 'any';
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'beverage' | 'any';
+}
+
 export interface Recipe {
   id: string;
   name: string;
@@ -15,14 +21,45 @@ export interface Recipe {
   missingIngredients: string[]; // Czego brakuje
 }
 
-const RECIPE_PROMPT = `Jesteś asystentem kulinarnym. Na podstawie listy produktów w lodówce sugeruj przepisy.
+function buildRecipePrompt(preferences?: RecipePreferences): string {
+  const basePrompt = `Jesteś asystentem kulinarnym. Na podstawie listy produktów w lodówce sugeruj przepisy.
 
 ZASADY:
 1. Sugeruj 3-5 przepisów, które maksymalnie wykorzystują dostępne produkty
-2. Priorytetyzuj produkty bliskie wygaśnięcia (expires_at)
-3. Zwracaj TYLKO poprawny JSON (bez markdown, bez dodatkowych tekstów, bez \`\`\`json)
-4. Przepisy powinny być proste (max 30 min przygotowania)
-5. W języku polskim
+2. Zwracaj TYLKO poprawny JSON (bez markdown, bez dodatkowych tekstów, bez \`\`\`json)
+3. W języku polskim`;
+
+  const rules: string[] = [];
+
+  // Priority type
+  if (preferences?.priorityType === 'expiry') {
+    rules.push('4. PRIORYTET: Wykorzystaj przede wszystkim produkty z krótkim terminem ważności (expires_at)');
+  }
+
+  // Prep time
+  if (preferences?.prepTime === 'short') {
+    rules.push('5. Przepisy powinny być bardzo szybkie (max 20 min przygotowania)');
+  } else if (preferences?.prepTime === 'medium') {
+    rules.push('5. Przepisy o średnim czasie przygotowania (20-40 min)');
+  } else if (preferences?.prepTime === 'long') {
+    rules.push('5. Przepisy mogą być bardziej złożone (>40 min przygotowania)');
+  }
+
+  // Meal type
+  if (preferences?.mealType && preferences.mealType !== 'any') {
+    const mealTypeMap = {
+      breakfast: 'śniadanie',
+      lunch: 'obiad',
+      dinner: 'kolacja',
+      snack: 'przekąska',
+      beverage: 'napój',
+    };
+    rules.push(`6. Przepisy powinny być odpowiednie na: ${mealTypeMap[preferences.mealType]}`);
+  }
+
+  const allRules = rules.length > 0 ? '\n' + rules.join('\n') : '';
+
+  return `${basePrompt}${allRules}
 
 Format JSON:
 {
@@ -39,8 +76,12 @@ Format JSON:
     }
   ]
 }`;
+}
 
-export async function suggestRecipes(products: Product[]): Promise<ApiResponse<Recipe[]>> {
+export async function suggestRecipes(
+  products: Product[],
+  preferences?: RecipePreferences
+): Promise<ApiResponse<Recipe[]>> {
   try {
     if (products.length === 0) {
       return {
@@ -54,15 +95,26 @@ export async function suggestRecipes(products: Product[]): Promise<ApiResponse<R
     const genAI = new GoogleGenerativeAI(GEMINI_CONFIG.apiKey);
     const model = genAI.getGenerativeModel({ model: GEMINI_CONFIG.model });
 
+    // Sortuj produkty według terminu ważności jeśli priorytet to 'expiry'
+    let sortedProducts = [...products];
+    if (preferences?.priorityType === 'expiry') {
+      sortedProducts.sort((a, b) => {
+        if (!a.expiresAt) return 1;
+        if (!b.expiresAt) return -1;
+        return a.expiresAt.getTime() - b.expiresAt.getTime();
+      });
+    }
+
     // Przygotuj listę produktów
-    const productsList = products
+    const productsList = sortedProducts
       .map((p) => {
         const expiryInfo = p.expiresAt ? `, ważne do ${p.expiresAt.toLocaleDateString('pl-PL')}` : '';
         return `- ${p.name} (${p.quantity} ${p.unit})${expiryInfo}`;
       })
       .join('\n');
 
-    const prompt = `${RECIPE_PROMPT}
+    const recipePrompt = buildRecipePrompt(preferences);
+    const prompt = `${recipePrompt}
 
 Mam w lodówce:
 ${productsList}

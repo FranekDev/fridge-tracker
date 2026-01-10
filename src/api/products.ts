@@ -123,3 +123,42 @@ export async function updateProductExpiry(
     };
   }
 }
+
+export async function updateProduct(
+  productId: string,
+  updates: Partial<Omit<Product, 'id' | 'addedAt'>>
+): Promise<ApiResponse<Product>> {
+  try {
+    const dbUpdates: any = {};
+
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
+    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.expiresAt !== undefined) {
+      dbUpdates.expires_at = updates.expiresAt ? updates.expiresAt.toISOString() : null;
+    }
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+
+    const { data, error } = await supabase
+      .from('products')
+      .update(dbUpdates)
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      data: transformDbProduct(data),
+      success: true,
+    };
+  } catch (error) {
+    console.error('updateProduct error:', error);
+    return {
+      data: null as any,
+      success: false,
+      error: 'Nie udało się zaktualizować produktu',
+    };
+  }
+}

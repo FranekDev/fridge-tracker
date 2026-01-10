@@ -6,36 +6,47 @@ import { useRecipes } from '../hooks/useRecipes';
 import { RecipeCard } from '../components/RecipeCard';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { RecipePreferencesModal, RecipePreferences } from '../components';
 import { Recipe } from '../api/recipes';
 import { SavedRecipe } from '../types';
 import { colors, spacing, borderRadius, typography, shadows } from '../theme';
 
 export function RecipesScreen() {
-  const { products } = useProducts();
+  const { products, refetch: refetchProducts } = useProducts();
   const { savedRecipes, loading, error, fetchRecipes, saveRecipe, deleteRecipe } = useRecipes();
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | SavedRecipe | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [preferencesModalVisible, setPreferencesModalVisible] = useState(false);
 
-  const handleGenerateRecipes = async () => {
-    if (products.length === 0) {
+  const handleOpenPreferences = () => {
+    setPreferencesModalVisible(true);
+  };
+
+  const handleGenerateRecipes = async (preferences: RecipePreferences) => {
+    setPreferencesModalVisible(false);
+    
+    // Odśwież listę produktów przed sprawdzeniem
+    const productsResponse = await refetchProducts();
+    
+    if (!productsResponse || !productsResponse.success || productsResponse.data.length === 0) {
       Alert.alert('Pusta lodówka', 'Dodaj produkty do lodówki, aby wygenerować przepisy.');
       return;
     }
 
-    const response = await fetchRecipes(products);
+    const recipeResponse = await fetchRecipes(productsResponse.data, preferences);
 
-    if (!response.success) {
-      Alert.alert('Błąd', response.error || 'Nie udało się wygenerować przepisów');
+    if (!recipeResponse.success) {
+      Alert.alert('Błąd', recipeResponse.error || 'Nie udało się wygenerować przepisów');
       return;
     }
 
-    if (response.data.length === 0) {
+    if (recipeResponse.data.length === 0) {
       Alert.alert('Brak przepisów', 'Nie znaleziono przepisów dla dostępnych produktów.');
       return;
     }
 
     // Auto-save first recipe
-    const firstRecipe = response.data[0];
+    const firstRecipe = recipeResponse.data[0];
     await saveRecipe(firstRecipe);
 
     // Show first recipe
@@ -82,7 +93,7 @@ export function RecipesScreen() {
       <View style={styles.buttonRow}>
         <Pressable
           style={[styles.generateButton, styles.generateButtonPrimary]}
-          onPress={handleGenerateRecipes}
+          onPress={handleOpenPreferences}
           disabled={loading}
         >
           <Text style={styles.generateButtonIcon}>✨</Text>
@@ -206,6 +217,13 @@ export function RecipesScreen() {
       />
 
       {renderDetailModal()}
+      
+      {/* Preferences Modal */}
+      <RecipePreferencesModal
+        visible={preferencesModalVisible}
+        onClose={() => setPreferencesModalVisible(false)}
+        onGenerate={handleGenerateRecipes}
+      />
     </SafeAreaView>
   );
 }
