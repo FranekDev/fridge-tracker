@@ -9,6 +9,7 @@ import { ScanScreen } from './src/screens/ScanScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { ReceiptsScreen } from './src/screens/ReceiptsScreen';
 import { RecipesScreen } from './src/screens/RecipesScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
 import { Product } from './src/types';
 import { colors, borderRadius, spacing, shadows } from './src/theme';
 import { useAuth } from './src/hooks/useAuth';
@@ -123,6 +124,14 @@ export default function App() {
                     >
                         {() => <ScanScreen onProductsScanned={handleProductsScanned} />}
                     </Tab.Screen>
+
+                    <Tab.Screen
+                        name="Settings"
+                        component={SettingsScreen}
+                        options={{
+                            tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} />,
+                        }}
+                    />
                 </Tab.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>

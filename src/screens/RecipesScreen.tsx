@@ -25,11 +25,11 @@ export function RecipesScreen() {
   const handleGenerateRecipes = async (preferences: RecipePreferences) => {
     setPreferencesModalVisible(false);
     
-    // Odśwież listę produktów przed sprawdzeniem
+    // Odśwież listę produktów
     const productsResponse = await refetchProducts();
     
-    if (!productsResponse || !productsResponse.success || productsResponse.data.length === 0) {
-      Alert.alert('Pusta lodówka', 'Dodaj produkty do lodówki, aby wygenerować przepisy.');
+    if (!productsResponse || !productsResponse.success) {
+      Alert.alert('Błąd', 'Nie udało się pobrać listy produktów.');
       return;
     }
 
@@ -66,7 +66,7 @@ export function RecipesScreen() {
       { text: 'Anuluj', style: 'cancel' },
       {
         text: 'Usuń',
-        style: 'destr kuctive',
+        style: 'destructive',
         onPress: async () => {
           await deleteRecipe(selectedRecipe.id);
           setDetailModalVisible(false);
@@ -82,7 +82,7 @@ export function RecipesScreen() {
         <View>
           <Text style={styles.greeting}>Recipe Ideas</Text>
           <Text style={styles.subtitle}>
-            {savedRecipes.length} {savedRecipes.length === 1 ? 'przepis' : 'przepisów'} zapisanych
+            {savedRecipes.length} {savedRecipes.length === 1 ? 'recipe' : 'recipes'} saved
           </Text>
         </View>
         <View style={styles.iconContainer}>
@@ -199,6 +199,11 @@ export function RecipesScreen() {
           icon="🍽️"
           title="No saved recipes"
           description="Generate recipe ideas from your fridge products. Tap the button above to get started!"
+        />
+        <RecipePreferencesModal
+          visible={preferencesModalVisible}
+          onClose={() => setPreferencesModalVisible(false)}
+          onGenerate={handleGenerateRecipes}
         />
       </SafeAreaView>
     );

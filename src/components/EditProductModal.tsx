@@ -25,13 +25,11 @@ interface EditProductModalProps {
 const categoryOptions: { key: ProductCategory; label: string; emoji: string }[] = [
     { key: 'dairy', label: 'Dairy', emoji: '🥛' },
     { key: 'meat', label: 'Meat', emoji: '🥩' },
-    { key: 'vegetables', label: 'Vegetables', emoji: '🥬' },
+    { key: 'vegetables', label: 'Veggies', emoji: '🥬' },
     { key: 'fruits', label: 'Fruits', emoji: '🍎' },
-    { key: 'beverages', label: 'Beverages', emoji: '🧃' },
+    { key: 'beverages', label: 'Drinks', emoji: '🧃' },
     { key: 'bakery', label: 'Bakery', emoji: '🍞' },
     { key: 'frozen', label: 'Frozen', emoji: '🧊' },
-    { key: 'snacks', label: 'Snacks', emoji: '🍿' },
-    { key: 'condiments', label: 'Condiments', emoji: '🧂' },
     { key: 'other', label: 'Other', emoji: '📦' },
 ];
 
@@ -76,12 +74,12 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
         if (!product) return;
 
         Alert.alert(
-            'Usuń produkt',
-            `Czy na pewno chcesz usunąć "${product.name}"?`,
+            'Delete Product',
+            `Are you sure you want to delete "${product.name}"?`,
             [
-                { text: 'Anuluj', style: 'cancel' },
+                { text: 'Cancel', style: 'cancel' },
                 {
-                    text: 'Usuń',
+                    text: 'Delete',
                     style: 'destructive',
                     onPress: () => {
                         onDelete(product.id);
@@ -108,7 +106,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Edytuj produkt</Text>
+                        <Text style={styles.modalTitle}>Edit Product</Text>
                         <Pressable onPress={handleCancel} style={styles.closeButton}>
                             <Text style={styles.closeButtonText}>✕</Text>
                         </Pressable>
@@ -117,7 +115,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                     <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
                         {/* Product Name */}
                         <View style={styles.fieldContainer}>
-                            <Text style={styles.label}>Nazwa produktu *</Text>
+                            <Text style={styles.label}>Product Name *</Text>
                             <TextInput
                                 style={styles.input}
                                 value={name}
@@ -130,7 +128,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                         {/* Quantity and Unit */}
                         <View style={styles.rowContainer}>
                             <View style={[styles.fieldContainer, styles.quantityField]}>
-                                <Text style={styles.label}>Ilość *</Text>
+                                <Text style={styles.label}>Quantity *</Text>
                                 <TextInput
                                     style={styles.input}
                                     value={quantity}
@@ -142,7 +140,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                             </View>
 
                             <View style={[styles.fieldContainer, styles.unitField]}>
-                                <Text style={styles.label}>Jednostka</Text>
+                                <Text style={styles.label}>Unit</Text>
                                 <ScrollView
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
@@ -173,7 +171,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
 
                         {/* Category */}
                         <View style={styles.fieldContainer}>
-                            <Text style={styles.label}>Kategoria</Text>
+                            <Text style={styles.label}>Category</Text>
                             <View style={styles.categoryGrid}>
                                 {categoryOptions.map((cat) => (
                                     <Pressable
@@ -200,15 +198,15 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
 
                         {/* Expiry Date */}
                         <View style={styles.fieldContainer}>
-                            <Text style={styles.label}>Termin przydatności (opcjonalnie)</Text>
+                            <Text style={styles.label}>Expiry Date (optional)</Text>
                             <Pressable
                                 onPress={() => setShowDatePicker(true)}
                                 style={styles.dateButton}
                             >
                                 <Text style={styles.dateButtonText}>
                                     {expiresAt
-                                        ? expiresAt.toLocaleDateString('pl-PL')
-                                        : 'Wybierz termin przydatności'}
+                                        ? expiresAt.toLocaleDateString('en-US')
+                                        : 'Select expiry date'}
                                 </Text>
                             </Pressable>
                             {expiresAt && (
@@ -216,7 +214,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                                     onPress={() => setExpiresAt(undefined)}
                                     style={styles.clearDateButton}
                                 >
-                                    <Text style={styles.clearDateButtonText}>Usuń datę</Text>
+                                    <Text style={styles.clearDateButtonText}>Clear Date</Text>
                                 </Pressable>
                             )}
                         </View>
@@ -240,7 +238,7 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                                         onPress={() => setShowDatePicker(false)}
                                         style={styles.datePickerDone}
                                     >
-                                        <Text style={styles.datePickerDoneText}>Gotowe</Text>
+                                        <Text style={styles.datePickerDoneText}>Done</Text>
                                     </Pressable>
                                 )}
                             </View>
@@ -250,18 +248,18 @@ export function EditProductModal({ visible, product, onClose, onSave, onDelete }
                     {/* Action Buttons */}
                     <View style={styles.modalActions}>
                         <Pressable onPress={handleDelete} style={styles.deleteButton}>
-                            <Text style={styles.deleteButtonText}>🗑️ Usuń</Text>
+                            <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
                         </Pressable>
                         <View style={styles.rightButtons}>
                             <Pressable onPress={handleCancel} style={styles.cancelButton}>
-                                <Text style={styles.cancelButtonText}>Anuluj</Text>
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
                             </Pressable>
                             <Pressable
                                 onPress={handleSave}
                                 style={[styles.saveButton, !name.trim() && styles.saveButtonDisabled]}
                                 disabled={!name.trim()}
                             >
-                                <Text style={styles.saveButtonText}>Zapisz</Text>
+                                <Text style={styles.saveButtonText}>Save</Text>
                             </Pressable>
                         </View>
                     </View>

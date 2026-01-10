@@ -19,6 +19,7 @@ const filters: { key: FilterType; label: string; emoji: string }[] = [
     { key: 'beverages', label: 'Drinks', emoji: '🧃' },
     { key: 'bakery', label: 'Bakery', emoji: '🍞' },
     { key: 'frozen', label: 'Frozen', emoji: '🧊' },
+    { key: 'other', label: 'Other', emoji: '📦' },
 ];
 
 interface FridgeScreenProps {
@@ -219,7 +220,14 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                 <EmptyState
                     icon="🧊"
                     title="Your fridge is empty"
-                    description="Start by scanning a grocery receipt to add your first items."
+                    description="Start by scanning a grocery receipt or add products manually."
+                    actionLabel="Add Product"
+                    onAction={() => setShowAddModal(true)}
+                />
+                <AddProductModal
+                    visible={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onAdd={handleAddProduct}
                 />
             </SafeAreaView>
         );

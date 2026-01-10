@@ -22,19 +22,19 @@ interface RecipePreferencesModalProps {
 }
 
 const prepTimeOptions = [
-    { key: 'short' as const, label: 'Krótkie (<20 min)', emoji: '⚡' },
-    { key: 'medium' as const, label: 'Średnie (20-40 min)', emoji: '⏱️' },
-    { key: 'long' as const, label: 'Długie (>40 min)', emoji: '🕐' },
-    { key: 'any' as const, label: 'Nieistotne', emoji: '🤷' },
+    { key: 'short' as const, label: 'Short (<20 min)', emoji: '⚡' },
+    { key: 'medium' as const, label: 'Medium (20-40 min)', emoji: '⏱️' },
+    { key: 'long' as const, label: 'Long (>40 min)', emoji: '🕐' },
+    { key: 'any' as const, label: 'Any', emoji: '🤷' },
 ];
 
 const mealTypeOptions = [
-    { key: 'breakfast' as const, label: 'Śniadanie', emoji: '🍳' },
-    { key: 'lunch' as const, label: 'Obiad', emoji: '🍽️' },
-    { key: 'dinner' as const, label: 'Kolacja', emoji: '🌙' },
-    { key: 'snack' as const, label: 'Przekąska', emoji: '🍿' },
-    { key: 'beverage' as const, label: 'Napój', emoji: '🥤' },
-    { key: 'any' as const, label: 'Nieistotne', emoji: '✨' },
+    { key: 'breakfast' as const, label: 'Breakfast', emoji: '🍳' },
+    { key: 'lunch' as const, label: 'Lunch', emoji: '🍽️' },
+    { key: 'dinner' as const, label: 'Dinner', emoji: '🌙' },
+    { key: 'snack' as const, label: 'Snack', emoji: '🍿' },
+    { key: 'beverage' as const, label: 'Beverage', emoji: '🥤' },
+    { key: 'any' as const, label: 'Any', emoji: '✨' },
 ];
 
 export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipePreferencesModalProps) {
@@ -60,7 +60,7 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Preferencje przepisu</Text>
+                        <Text style={styles.modalTitle}>Recipe Preferences</Text>
                         <Pressable onPress={onClose} style={styles.closeButton}>
                             <Text style={styles.closeButtonText}>✕</Text>
                         </Pressable>
@@ -69,9 +69,9 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
                     <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
                         {/* Priority Type */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Priorytet produktów</Text>
+                            <Text style={styles.sectionTitle}>Product Priority</Text>
                             <Text style={styles.sectionDescription}>
-                                Jak mają być dobierane produkty do przepisu?
+                                How should products be selected for the recipe?
                             </Text>
                             <View style={styles.optionsRow}>
                                 <Pressable
@@ -88,10 +88,10 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
                                             priorityType === 'expiry' && styles.optionLabelActive,
                                         ]}
                                     >
-                                        Krótki termin ważności
+                                        Short Expiry Date
                                     </Text>
                                     <Text style={styles.optionDescription}>
-                                        Użyj produktów, które niedługo stracą ważność
+                                        Use products that will expire soon
                                     </Text>
                                 </Pressable>
 
@@ -109,10 +109,10 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
                                             priorityType === 'none' && styles.optionLabelActive,
                                         ]}
                                     >
-                                        Dowolne
+                                        Any
                                     </Text>
                                     <Text style={styles.optionDescription}>
-                                        Dowolne produkty z lodówki
+                                        Any products from the fridge
                                     </Text>
                                 </Pressable>
                             </View>
@@ -120,7 +120,7 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
 
                         {/* Prep Time */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Czas przygotowania</Text>
+                            <Text style={styles.sectionTitle}>Preparation Time</Text>
                             <View style={styles.optionsGrid}>
                                 {prepTimeOptions.map((option) => (
                                     <Pressable
@@ -147,7 +147,7 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
 
                         {/* Meal Type */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Przeznaczenie</Text>
+                            <Text style={styles.sectionTitle}>Meal Type</Text>
                             <View style={styles.optionsGrid}>
                                 {mealTypeOptions.map((option) => (
                                     <Pressable
@@ -176,10 +176,10 @@ export function RecipePreferencesModal({ visible, onClose, onGenerate }: RecipeP
                     {/* Action Buttons */}
                     <View style={styles.modalActions}>
                         <Pressable onPress={onClose} style={styles.cancelButton}>
-                            <Text style={styles.cancelButtonText}>Anuluj</Text>
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
                         </Pressable>
                         <Pressable onPress={handleGenerate} style={styles.generateButton}>
-                            <Text style={styles.generateButtonText}>✨ Generuj przepisy</Text>
+                            <Text style={styles.generateButtonText}>✨ Generate Recipe</Text>
                         </Pressable>
                     </View>
                 </View>

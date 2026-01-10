@@ -199,7 +199,16 @@ export async function saveRecipe(recipe: Recipe): Promise<ApiResponse<SavedRecip
  */
 export async function getSavedRecipes(): Promise<ApiResponse<SavedRecipe[]>> {
   try {
-    const { data, error } = await supabase.from('recipes').select('*').order('created_at', { ascending: false });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -224,7 +233,16 @@ export async function getSavedRecipes(): Promise<ApiResponse<SavedRecipe[]>> {
  */
 export async function deleteRecipe(recipeId: string): Promise<ApiResponse<{ deleted: boolean }>> {
   try {
-    const { error } = await supabase.from('recipes').delete().eq('id', recipeId);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', recipeId)
+      .eq('user_id', user.id);
 
     if (error) throw error;
 

@@ -32,9 +32,15 @@ function transformAppProduct(product: Omit<Product, 'id'>) {
 
 export async function getMyProducts(): Promise<ApiResponse<Product[]>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -81,7 +87,16 @@ export async function addProducts(products: Product[]): Promise<ApiResponse<{ ad
 
 export async function removeProduct(productId: string): Promise<ApiResponse<{ removed: boolean }>> {
   try {
-    const { error } = await supabase.from('products').delete().eq('id', productId);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId)
+      .eq('user_id', user.id);
 
     if (error) throw error;
 
@@ -101,10 +116,16 @@ export async function updateProductExpiry(
   expiresAt: Date
 ): Promise<ApiResponse<Product>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const { data, error } = await supabase
       .from('products')
       .update({ expires_at: expiresAt.toISOString() })
       .eq('id', productId)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -129,6 +150,11 @@ export async function updateProduct(
   updates: Partial<Omit<Product, 'id' | 'addedAt'>>
 ): Promise<ApiResponse<Product>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const dbUpdates: any = {};
 
     if (updates.name !== undefined) dbUpdates.name = updates.name;
@@ -144,6 +170,7 @@ export async function updateProduct(
       .from('products')
       .update(dbUpdates)
       .eq('id', productId)
+      .eq('user_id', user.id)
       .select()
       .single();
 

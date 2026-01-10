@@ -36,10 +36,10 @@ export function ReceiptsScreen() {
   };
 
   const handleDeleteReceipt = (receipt: ReceiptScan) => {
-    Alert.alert('Usuń paragon', `Usunąć paragon z ${receipt.storeName || 'nieznanego sklepu'}?`, [
-      { text: 'Anuluj', style: 'cancel' },
+    Alert.alert('Delete Receipt', `Delete receipt from ${receipt.storeName || 'unknown store'}?`, [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Usuń',
+        text: 'Delete',
         style: 'destructive',
         onPress: async () => {
           await deleteReceipt(receipt.id);
@@ -52,9 +52,9 @@ export function ReceiptsScreen() {
     <View style={styles.header}>
       <View style={styles.headerTop}>
         <View>
-          <Text style={styles.greeting}>Historia paragonów</Text>
+          <Text style={styles.greeting}>Receipt History</Text>
           <Text style={styles.subtitle}>
-            {receipts.length} {receipts.length === 1 ? 'paragon' : 'paragonów'}
+            {receipts.length} {receipts.length === 1 ? 'receipt' : 'receipts'}
           </Text>
         </View>
         <View style={styles.iconContainer}>
@@ -70,7 +70,7 @@ export function ReceiptsScreen() {
         <ScrollView contentContainerStyle={styles.modalScrollContent}>
           <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{selectedReceipt?.storeName || 'Paragon'}</Text>
+              <Text style={styles.modalTitle}>{selectedReceipt?.storeName || 'Receipt'}</Text>
               <Pressable onPress={() => setImageModalVisible(false)} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>✕</Text>
               </Pressable>
@@ -82,10 +82,10 @@ export function ReceiptsScreen() {
                   imageLoadError ? (
                     <View style={styles.imagePlaceholder}>
                       <Text style={styles.placeholderIcon}>📷</Text>
-                      <Text style={styles.placeholderTitle}>Nie udało się załadować zdjęcia</Text>
+                      <Text style={styles.placeholderTitle}>Failed to load image</Text>
                       <Text style={styles.placeholderError}>{imageLoadError}</Text>
                       <Text style={styles.placeholderHint}>
-                        Sprawdź czy bucket 'receipts' w Supabase Storage jest publiczny
+                        Check if 'receipts' bucket in Supabase Storage is public
                       </Text>
                     </View>
                   ) : (
@@ -95,16 +95,16 @@ export function ReceiptsScreen() {
                       resizeMode="contain"
                       onError={(e) => {
                         console.error('[Image] Failed to load receipt image:', e.nativeEvent.error);
-                        setImageLoadError(e.nativeEvent.error || 'Nieznany błąd');
+                        setImageLoadError(e.nativeEvent.error || 'Unknown error');
                       }}
                     />
                   )
                 ) : (
                   <View style={styles.imagePlaceholder}>
                     <Text style={styles.placeholderIcon}>📷</Text>
-                    <Text style={styles.placeholderTitle}>Brak zdjęcia paragonu</Text>
+                    <Text style={styles.placeholderTitle}>No receipt image</Text>
                     <Text style={styles.placeholderHint}>
-                      Zdjęcie nie zostało zapisane podczas skanowania
+                      Image was not saved during scanning
                     </Text>
                   </View>
                 )}
@@ -112,7 +112,7 @@ export function ReceiptsScreen() {
                 {selectedReceipt.products && selectedReceipt.products.length > 0 && (
                   <View style={styles.productsSection}>
                     <Text style={styles.productsSectionTitle}>
-                      Zeskanowane produkty ({selectedReceipt.products.length})
+                      Scanned products ({selectedReceipt.products.length})
                     </Text>
                     <View style={styles.productsList}>
                       {selectedReceipt.products.map((product) => (
@@ -123,7 +123,7 @@ export function ReceiptsScreen() {
                               {product.quantity} {product.unit}
                             </Text>
                           </View>
-                          {product.price && <Text style={styles.productPrice}>{product.price.toFixed(2)} zł</Text>}
+                          {product.price && <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>}
                         </View>
                       ))}
                     </View>
@@ -140,7 +140,7 @@ export function ReceiptsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <LoadingOverlay visible={true} message="Ładowanie paragonów..." />
+        <LoadingOverlay visible={true} message="Loading receipts..." />
       </SafeAreaView>
     );
   }
@@ -149,7 +149,7 @@ export function ReceiptsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         {renderHeader()}
-        <EmptyState icon="⚠️" title="Ups!" description={error} actionLabel="Spróbuj ponownie" onAction={refetch} />
+        <EmptyState icon="⚠️" title="Oops!" description={error} actionLabel="Try Again" onAction={refetch} />
       </SafeAreaView>
     );
   }
@@ -158,7 +158,7 @@ export function ReceiptsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         {renderHeader()}
-        <EmptyState icon="🧾" title="Brak paragonów" description="Twoje zeskanowane paragony pojawią się tutaj. Przejdź do zakładki Skanuj, aby dodać pierwszy paragon." />
+        <EmptyState icon="🧾" title="No Receipts" description="Your scanned receipts will appear here. Go to the Scan tab to add your first receipt." />
       </SafeAreaView>
     );
   }

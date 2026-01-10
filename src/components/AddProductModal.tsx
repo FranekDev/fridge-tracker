@@ -22,13 +22,11 @@ interface AddProductModalProps {
 const categoryOptions: { key: ProductCategory; label: string; emoji: string }[] = [
     { key: 'dairy', label: 'Dairy', emoji: '🥛' },
     { key: 'meat', label: 'Meat', emoji: '🥩' },
-    { key: 'vegetables', label: 'Vegetables', emoji: '🥬' },
+    { key: 'vegetables', label: 'Veggies', emoji: '🥬' },
     { key: 'fruits', label: 'Fruits', emoji: '🍎' },
-    { key: 'beverages', label: 'Beverages', emoji: '🧃' },
+    { key: 'beverages', label: 'Drinks', emoji: '🧃' },
     { key: 'bakery', label: 'Bakery', emoji: '🍞' },
     { key: 'frozen', label: 'Frozen', emoji: '🧊' },
-    { key: 'snacks', label: 'Snacks', emoji: '🍿' },
-    { key: 'condiments', label: 'Condiments', emoji: '🧂' },
     { key: 'other', label: 'Other', emoji: '📦' },
 ];
 

@@ -65,8 +65,8 @@ export function ReceiptCard({ receipt, onPress, onLongPress }: ReceiptCardProps)
 
           {receipt.totalAmount && (
             <View style={styles.amountContainer}>
-              <Text style={styles.amountLabel}>Suma:</Text>
-              <Text style={styles.amount}>{receipt.totalAmount.toFixed(2)} zł</Text>
+              <Text style={styles.amountLabel}>Total:</Text>
+              <Text style={styles.amount}>${receipt.totalAmount.toFixed(2)}</Text>
             </View>
           )}
         </View>
