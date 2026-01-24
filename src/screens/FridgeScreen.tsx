@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert, Ani
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Product, ProductCategory } from '../types';
 import { useProducts } from '../hooks/useProducts';
-import { ProductCard } from '../components/ProductCard';
+import { ProductCard, AddProductModal, EditProductModal } from '../components';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { colors, spacing, borderRadius, typography, shadows } from '../theme';
@@ -19,6 +19,7 @@ const filters: { key: FilterType; label: string; emoji: string }[] = [
     { key: 'beverages', label: 'Drinks', emoji: '🧃' },
     { key: 'bakery', label: 'Bakery', emoji: '🍞' },
     { key: 'frozen', label: 'Frozen', emoji: '🧊' },
+    { key: 'other', label: 'Other', emoji: '📦' },
 ];
 
 interface FridgeScreenProps {
@@ -34,10 +35,14 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
         refetch,
         addProducts: addProductsToDb,
         removeProduct: removeProductFromDb,
+        updateProduct: updateProductInDb,
     } = useProducts();
 
     const [refreshing, setRefreshing] = useState(false);
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
     const headerAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -77,6 +82,29 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                 },
             },
         ]);
+    };
+
+    const handleAddProduct = async (product: Omit<Product, 'id'>) => {
+        // Tworzymy tymczasowy produkt z ID dla lokalnego stanu
+        const productWithId: Product = {
+            ...product,
+            id: `temp-${Date.now()}`, // Tymczasowe ID, będzie zastąpione przez DB
+        };
+        await addProductsToDb([productWithId]);
+        // Hook useProducts automatycznie odświeży listę po dodaniu
+    };
+
+    const handleEditProduct = (product: Product) => {
+        setSelectedProduct(product);
+        setShowEditModal(true);
+    };
+
+    const handleSaveProduct = async (productId: string, updates: Partial<Omit<Product, 'id' | 'addedAt'>>) => {
+        await updateProductInDb(productId, updates);
+    };
+
+    const handleDeleteFromEdit = async (productId: string) => {
+        await removeProductFromDb(productId);
     };
 
     const filteredProducts =
@@ -192,7 +220,14 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                 <EmptyState
                     icon="🧊"
                     title="Your fridge is empty"
-                    description="Start by scanning a grocery receipt to add your first items."
+                    description="Start by scanning a grocery receipt or add products manually."
+                    actionLabel="Add Product"
+                    onAction={() => setShowAddModal(true)}
+                />
+                <AddProductModal
+                    visible={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onAdd={handleAddProduct}
                 />
             </SafeAreaView>
         );
@@ -219,7 +254,11 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                             ],
                         }}
                     >
-                        <ProductCard product={item} onLongPress={() => handleDeleteProduct(item)} />
+                        <ProductCard 
+                            product={item} 
+                            onPress={() => handleEditProduct(item)}
+                            onLongPress={() => handleDeleteProduct(item)} 
+                        />
                     </Animated.View>
                 )}
                 contentContainerStyle={styles.listContent}
@@ -237,6 +276,33 @@ export function FridgeScreen({ newProducts, onProductsAdded }: FridgeScreenProps
                         <Text style={styles.emptyFilterText}>No items in this category</Text>
                     </View>
                 }
+            />
+
+            {/* Floating Action Button */}
+            <Pressable
+                style={styles.fab}
+                onPress={() => setShowAddModal(true)}
+            >
+                <Text style={styles.fabIcon}>+</Text>
+            </Pressable>
+
+            {/* Add Product Modal */}
+            <AddProductModal
+                visible={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onAdd={handleAddProduct}
+            />
+
+            {/* Edit Product Modal */}
+            <EditProductModal
+                visible={showEditModal}
+                product={selectedProduct}
+                onClose={() => {
+                    setShowEditModal(false);
+                    setSelectedProduct(null);
+                }}
+                onSave={handleSaveProduct}
+                onDelete={handleDeleteFromEdit}
             />
         </SafeAreaView>
     );
@@ -338,5 +404,24 @@ const styles = StyleSheet.create({
     emptyFilterText: {
         ...typography.body,
         color: colors.textMuted,
+    },
+    fab: {
+        position: 'absolute',
+        bottom: spacing.xl,
+        right: spacing.xl,
+        width: 56,
+        height: 56,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.accent,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...shadows.lg,
+        elevation: 8,
+    },
+    fabIcon: {
+        fontSize: 32,
+        color: colors.textInverse,
+        fontWeight: '300',
+        lineHeight: 32,
     },
 });

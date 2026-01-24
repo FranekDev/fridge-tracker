@@ -20,6 +20,7 @@ export function useProducts() {
     }
 
     setLoading(false);
+    return response;
   }, []);
 
   useEffect(() => {
@@ -50,6 +51,14 @@ export function useProducts() {
     return response;
   }, []);
 
+  const updateProduct = useCallback(async (productId: string, updates: Partial<Omit<Product, 'id' | 'addedAt'>>) => {
+    const response = await ProductsApi.updateProduct(productId, updates);
+    if (response.success) {
+      setProducts((prev) => prev.map((p) => (p.id === productId ? response.data : p)));
+    }
+    return response;
+  }, []);
+
   return {
     products,
     loading,
@@ -58,5 +67,6 @@ export function useProducts() {
     addProducts,
     removeProduct,
     updateExpiry,
+    updateProduct,
   };
 }

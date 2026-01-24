@@ -224,10 +224,16 @@ export async function processReceipt(imageUri: string): Promise<ApiResponse<Rece
  */
 export async function getReceiptScans(): Promise<ApiResponse<ReceiptScan[]>> {
   try {
-    // Pobierz paragony
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Pobierz paragony użytkownika
     const { data: receiptsData, error: receiptsError } = await supabase
       .from('receipts')
       .select('*')
+      .eq('user_id', user.id)
       .order('scan_date', { ascending: false });
 
     if (receiptsError) throw receiptsError;

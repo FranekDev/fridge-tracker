@@ -6,36 +6,47 @@ import { useRecipes } from '../hooks/useRecipes';
 import { RecipeCard } from '../components/RecipeCard';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { RecipePreferencesModal, RecipePreferences } from '../components';
 import { Recipe } from '../api/recipes';
 import { SavedRecipe } from '../types';
 import { colors, spacing, borderRadius, typography, shadows } from '../theme';
 
 export function RecipesScreen() {
-  const { products } = useProducts();
+  const { products, refetch: refetchProducts } = useProducts();
   const { savedRecipes, loading, error, fetchRecipes, saveRecipe, deleteRecipe } = useRecipes();
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | SavedRecipe | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [preferencesModalVisible, setPreferencesModalVisible] = useState(false);
 
-  const handleGenerateRecipes = async () => {
-    if (products.length === 0) {
-      Alert.alert('Pusta lodówka', 'Dodaj produkty do lodówki, aby wygenerować przepisy.');
+  const handleOpenPreferences = () => {
+    setPreferencesModalVisible(true);
+  };
+
+  const handleGenerateRecipes = async (preferences: RecipePreferences) => {
+    setPreferencesModalVisible(false);
+    
+    // Odśwież listę produktów
+    const productsResponse = await refetchProducts();
+    
+    if (!productsResponse || !productsResponse.success) {
+      Alert.alert('Błąd', 'Nie udało się pobrać listy produktów.');
       return;
     }
 
-    const response = await fetchRecipes(products);
+    const recipeResponse = await fetchRecipes(productsResponse.data, preferences);
 
-    if (!response.success) {
-      Alert.alert('Błąd', response.error || 'Nie udało się wygenerować przepisów');
+    if (!recipeResponse.success) {
+      Alert.alert('Błąd', recipeResponse.error || 'Nie udało się wygenerować przepisów');
       return;
     }
 
-    if (response.data.length === 0) {
+    if (recipeResponse.data.length === 0) {
       Alert.alert('Brak przepisów', 'Nie znaleziono przepisów dla dostępnych produktów.');
       return;
     }
 
     // Auto-save first recipe
-    const firstRecipe = response.data[0];
+    const firstRecipe = recipeResponse.data[0];
     await saveRecipe(firstRecipe);
 
     // Show first recipe
@@ -55,7 +66,7 @@ export function RecipesScreen() {
       { text: 'Anuluj', style: 'cancel' },
       {
         text: 'Usuń',
-        style: 'destr kuctive',
+        style: 'destructive',
         onPress: async () => {
           await deleteRecipe(selectedRecipe.id);
           setDetailModalVisible(false);
@@ -71,7 +82,7 @@ export function RecipesScreen() {
         <View>
           <Text style={styles.greeting}>Recipe Ideas</Text>
           <Text style={styles.subtitle}>
-            {savedRecipes.length} {savedRecipes.length === 1 ? 'przepis' : 'przepisów'} zapisanych
+            {savedRecipes.length} {savedRecipes.length === 1 ? 'recipe' : 'recipes'} saved
           </Text>
         </View>
         <View style={styles.iconContainer}>
@@ -82,7 +93,7 @@ export function RecipesScreen() {
       <View style={styles.buttonRow}>
         <Pressable
           style={[styles.generateButton, styles.generateButtonPrimary]}
-          onPress={handleGenerateRecipes}
+          onPress={handleOpenPreferences}
           disabled={loading}
         >
           <Text style={styles.generateButtonIcon}>✨</Text>
@@ -189,6 +200,11 @@ export function RecipesScreen() {
           title="No saved recipes"
           description="Generate recipe ideas from your fridge products. Tap the button above to get started!"
         />
+        <RecipePreferencesModal
+          visible={preferencesModalVisible}
+          onClose={() => setPreferencesModalVisible(false)}
+          onGenerate={handleGenerateRecipes}
+        />
       </SafeAreaView>
     );
   }
@@ -206,6 +222,13 @@ export function RecipesScreen() {
       />
 
       {renderDetailModal()}
+      
+      {/* Preferences Modal */}
+      <RecipePreferencesModal
+        visible={preferencesModalVisible}
+        onClose={() => setPreferencesModalVisible(false)}
+        onGenerate={handleGenerateRecipes}
+      />
     </SafeAreaView>
   );
 }

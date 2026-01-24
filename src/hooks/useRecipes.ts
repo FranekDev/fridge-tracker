@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Recipe } from '../api/recipes';
+import { Recipe, RecipePreferences } from '../api/recipes';
 import * as RecipesApi from '../api/recipes';
 import { Product, SavedRecipe } from '../types';
 
@@ -13,11 +13,11 @@ export function useRecipes() {
     fetchSavedRecipes();
   }, []);
 
-  const fetchRecipes = useCallback(async (products: Product[]) => {
+  const fetchRecipes = useCallback(async (products: Product[], preferences?: RecipePreferences) => {
     setLoading(true);
     setError(null);
 
-    const response = await RecipesApi.suggestRecipes(products);
+    const response = await RecipesApi.suggestRecipes(products, preferences);
 
     if (response.success) {
       setRecipes(response.data);

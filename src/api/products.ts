@@ -32,9 +32,15 @@ function transformAppProduct(product: Omit<Product, 'id'>) {
 
 export async function getMyProducts(): Promise<ApiResponse<Product[]>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -81,7 +87,16 @@ export async function addProducts(products: Product[]): Promise<ApiResponse<{ ad
 
 export async function removeProduct(productId: string): Promise<ApiResponse<{ removed: boolean }>> {
   try {
-    const { error } = await supabase.from('products').delete().eq('id', productId);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId)
+      .eq('user_id', user.id);
 
     if (error) throw error;
 
@@ -101,10 +116,16 @@ export async function updateProductExpiry(
   expiresAt: Date
 ): Promise<ApiResponse<Product>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const { data, error } = await supabase
       .from('products')
       .update({ expires_at: expiresAt.toISOString() })
       .eq('id', productId)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -120,6 +141,51 @@ export async function updateProductExpiry(
       data: null as any,
       success: false,
       error: 'Nie udało się zaktualizować daty ważności',
+    };
+  }
+}
+
+export async function updateProduct(
+  productId: string,
+  updates: Partial<Omit<Product, 'id' | 'addedAt'>>
+): Promise<ApiResponse<Product>> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const dbUpdates: any = {};
+
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
+    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.expiresAt !== undefined) {
+      dbUpdates.expires_at = updates.expiresAt ? updates.expiresAt.toISOString() : null;
+    }
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+
+    const { data, error } = await supabase
+      .from('products')
+      .update(dbUpdates)
+      .eq('id', productId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      data: transformDbProduct(data),
+      success: true,
+    };
+  } catch (error) {
+    console.error('updateProduct error:', error);
+    return {
+      data: null as any,
+      success: false,
+      error: 'Nie udało się zaktualizować produktu',
     };
   }
 }
